@@ -17,13 +17,16 @@ void loop(){
     sevseg.setNumber(2023,3);
     sevseg.refreshDisplay(); 
 }*/
+
+/*Partie qui fait le compteur en dessous*/
+
 #include "SevSeg.h"
 SevSeg sevseg;
 
 // Variables globales
 int Compteur = 0;     // début
 int attente =0;        // compteur en attente
-int attentemax =999;  // définne la vitesse
+int attentemax =1000;  // définne la vitesse
 
 void setup(){
   byte numDigits = 4;

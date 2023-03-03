@@ -10,7 +10,7 @@ int humidity, temperature;
 int buzz=8;
 int ventilo = 9;
 int led = 10;
-const char DIN_RECEPTEUR_INFRAROUGE = 3;                      //le pin de donée du recepteur infra
+const char DIN_RECEPTEUR_INFRAROUGE = 11;                      //le pin de donée du recepteur infra
 IRrecv monRecepteurInfraRouge (DIN_RECEPTEUR_INFRAROUGE); //ici on crée un objet
 decode_results messageRecu;                   //pour décoder le message reçu en hexadécimal
 StaticJsonDocument<50> doc;
@@ -59,13 +59,13 @@ void loop()
             delay(500);
             if(messageRecu.value==0xFFA25D){
               digitalWrite(ventilo, HIGH);
-              digitalWrite(10, HIGH);
+              digitalWrite(led, HIGH);
              
              
             }
             if(messageRecu.value==0xFF629D){
               digitalWrite(ventilo, LOW);
-              digitalWrite(10, LOW);
+              digitalWrite(led, LOW);
              
             }
             monRecepteurInfraRouge.resume();
