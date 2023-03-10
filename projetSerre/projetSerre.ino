@@ -25,9 +25,9 @@
   Copyright 2020, The MathWorks, Inc.
 */
 #include <WiFi.h>
-#include "Servo.h"
-#define servo A1
-#define photo 26  // composante photoresistor sur la pin A1
+//#include "Servo.h"
+#define servo 11
+#define photo 21  // composante photoresistor sur la pin A1
 #include "secrets.h"
 #include "DHT.h"
 #define RED 14
@@ -47,7 +47,7 @@ unsigned int lumiere;
 WiFiClient  client;
 DHT dht(DHTPIN, DHTTYPE);
 void setup() {
-  issa.attach(5); // attache le servo au pin spécifié
+  //issa.attach(5); // attache le servo au pin spécifié
   pinMode(photo, INPUT);
   pinMode(RED, OUTPUT);
   pinMode(GRN, OUTPUT);
@@ -80,7 +80,9 @@ void loop() {
     Serial.println (WiFi.localIP ());
       // Reading temperature or humidity takes about 250 milliseconds!
   // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
-  float value = analogRead(photo);
+
+  }
+    float value = analogRead(photo);
   float h = dht.readHumidity();
   // Read temperature as Celsius (the default)
   float t = dht.readTemperature();
@@ -103,11 +105,11 @@ void loop() {
   Serial.print(F("Humidity: "));
   Serial.print(h);
   Serial.print(F("%  Temperature: "));
-  Serial.println(t);
-  Serial.print(F("luminosité: "));  
+  Serial.print(t);
+  Serial.print(F(" luminosité: "));  
   Serial.println(value);
 
-   delay(2000);
+   delay(5000);
   if(t<30){
     digitalWrite(ventilo, LOW);
        digitalWrite(RED, LOW);
@@ -124,10 +126,10 @@ void loop() {
  
    delay(1000);
       }
-  }
+   /*if (value < 80) { issa.write(0); }
+   if (value >= 80) { issa.write(180); }*/
 }
-   if (t < 30) { issa.write(0); }
-   if (t >= 30) { issa.write(180); }
+
 
 
  
