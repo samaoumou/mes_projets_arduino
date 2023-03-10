@@ -26,29 +26,29 @@
 */
 #include <WiFi.h>
 #include "secrets.h"
-//#include "ThingSpeak.h" // always include thingspeak header file after other header files and custom macros
 #include "DHT.h"
 #define DHTTYPE DHT11   // DHT 11
 //#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
 //#define DHTTYPE DHT21   // DHT 21 (AM2301)
- int led = 22;
 #define DHTPIN 23     // Digital pin connected to the DHT sensor
 char ssid[] = SECRET_SSID;   // your network SSID (name) 
 char pass[] = SECRET_PASS;   // your network password
 int keyIndex = 0;            // your network key Index number (needed only for WEP)
+int ventilo = 22;
+int buzz = 15;
 WiFiClient  client;
 DHT dht(DHTPIN, DHTTYPE);
 void setup() {
   Serial.begin(115200);  //Initialize serial
   Serial.println(F("DHTxx test!"));
-  pinMode(led, OUTPUT);
+  pinMode(ventilo, OUTPUT);
+  pinMode(buzz, OUTPUT);
   dht.begin();
   while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo native USB port only
   }
   
   WiFi.mode(WIFI_STA);   
- // ThingSpeak.begin(client);  // Initialize ThingSpeak
 }
 void loop() {
   delay(2000);
@@ -85,10 +85,10 @@ void loop() {
   Serial.print(F("%  Temperature: "));
   Serial.println(t);
   if(t<30){
-    digitalWrite(led, LOW);
+    digitalWrite(ventilo, LOW);
     }
     else{
-      digitalWrite(led, HIGH);
+      digitalWrite(ventilo, HIGH);
       }
   }
 }
