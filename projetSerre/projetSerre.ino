@@ -25,6 +25,9 @@
   Copyright 2020, The MathWorks, Inc.
 */
 #include <WiFi.h>
+#include "Servo.h"
+#define servo A1
+#define photo 26  // composante photoresistor sur la pin A1
 #include "secrets.h"
 #include "DHT.h"
 #define RED 14
@@ -39,10 +42,13 @@ char pass[] = SECRET_PASS;   // your network password
 int keyIndex = 0;            // your network key Index number (needed only for WEP)
 int ventilo = 22;
 int buzz = 15;
+unsigned int lumiere;
 
 WiFiClient  client;
 DHT dht(DHTPIN, DHTTYPE);
 void setup() {
+  issa.attach(5); // attache le servo au pin spécifié
+  pinMode(photo, INPUT);
   pinMode(RED, OUTPUT);
   pinMode(GRN, OUTPUT);
   pinMode(BLU, OUTPUT);
@@ -74,6 +80,7 @@ void loop() {
     Serial.println (WiFi.localIP ());
       // Reading temperature or humidity takes about 250 milliseconds!
   // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
+  float value = analogRead(photo);
   float h = dht.readHumidity();
   // Read temperature as Celsius (the default)
   float t = dht.readTemperature();
@@ -90,12 +97,17 @@ void loop() {
    delay(1000);
     return;
   }
+  
   float hif = dht.computeHeatIndex(f, h);
   float hic = dht.computeHeatIndex(t, h, false);
   Serial.print(F("Humidity: "));
   Serial.print(h);
   Serial.print(F("%  Temperature: "));
   Serial.println(t);
+  Serial.print(F("luminosité: "));  
+  Serial.println(value);
+
+   delay(2000);
   if(t<30){
     digitalWrite(ventilo, LOW);
        digitalWrite(RED, LOW);
@@ -114,3 +126,10 @@ void loop() {
       }
   }
 }
+   if (t < 30) { issa.write(0); }
+   if (t >= 30) { issa.write(180); }
+
+
+ 
+
+ 
