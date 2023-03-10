@@ -24,34 +24,37 @@
   
   Copyright 2020, The MathWorks, Inc.
 */
+
 #include <WiFi.h>
 #include "secrets.h"
-//#include "ThingSpeak.h" // always include thingspeak header file after other header files and custom macros
-#include "DHT.h"
-#define DHTTYPE DHT11   // DHT 11
-//#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
-//#define DHTTYPE DHT21   // DHT 21 (AM2301)
- int led = 22;
-#define DHTPIN 23     // Digital pin connected to the DHT sensor
+#include "ThingSpeak.h" // always include thingspeak header file after other header files and custom macros
+
 char ssid[] = SECRET_SSID;   // your network SSID (name) 
 char pass[] = SECRET_PASS;   // your network password
 int keyIndex = 0;            // your network key Index number (needed only for WEP)
 WiFiClient  client;
-DHT dht(DHTPIN, DHTTYPE);
+
+// Weather station channel details
+unsigned long weatherStationChannelNumber = SECRET_CH_ID_WEATHER_STATION;
+unsigned int temperatureFieldNumber = 4;
+
+// Counting channel details
+unsigned long counterChannelNumber = SECRET_CH_ID_COUNTER;
+const char * myCounterReadAPIKey = SECRET_READ_APIKEY_COUNTER;
+unsigned int counterFieldNumber = 1; 
+
 void setup() {
   Serial.begin(115200);  //Initialize serial
-  Serial.println(F("DHTxx test!"));
-  pinMode(led, OUTPUT);
-  dht.begin();
   while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo native USB port only
   }
   
   WiFi.mode(WIFI_STA);   
- // ThingSpeak.begin(client);  // Initialize ThingSpeak
+  ThingSpeak.begin(client);  // Initialize ThingSpeak
 }
+
 void loop() {
-  delay(2000);
+
   int statusCode = 0;
   
   // Connect or reconnect to WiFi
@@ -65,30 +68,34 @@ void loop() {
     } 
     Serial.println("\nConnected");
     Serial.println (WiFi.localIP ());
-      // Reading temperature or humidity takes about 250 milliseconds!
-  // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
-  float h = dht.readHumidity();
-  // Read temperature as Celsius (the default)
-  float t = dht.readTemperature();
-  // Read temperature as Fahrenheit (isFahrenheit = true)
-  float f = dht.readTemperature(true);
+  }
 
-  // Check if any reads failed and exit early (to try again).
-  if (isnan(h) || isnan(t) || isnan(f)) {
-    Serial.println(F("erreur de donnée"));
-    return;
+   Read in field 4 of the public channel recording the temperature
+  float temperatureInF = ThingSpeak.readFloatField(weatherStationChannelNumber, temperatureFieldNumber);  
+
+   Check the status of the read operation to see if it was successful
+  statusCode = ThingSpeak.getLastReadStatus();
+  if(statusCode == 200){
+    Serial.println("Temperature at MathWorks HQ: " + String(temperatureInF) + " deg F");
   }
-  float hif = dht.computeHeatIndex(f, h);
-  float hic = dht.computeHeatIndex(t, h, false);
-  Serial.print(F("Humidity: "));
-  Serial.print(h);
-  Serial.print(F("%  Temperature: "));
-  Serial.println(t);
-  if(t<30){
-    digitalWrite(led, LOW);
-    }
-    else{
-      digitalWrite(led, HIGH);
-      }
+  else{
+    Serial.println("Problem reading channel. HTTP error code " + String(statusCode)); 
   }
+  
+  delay(15000); // No need to read the temperature too often.
+
+  // Read in field 1 of the private channel which is a counter  
+  long count = ThingSpeak.readLongField(counterChannelNumber, counterFieldNumber, myCounterReadAPIKey);  
+
+   // Check the status of the read operation to see if it was successful
+  statusCode = ThingSpeak.getLastReadStatus();
+  if(statusCode == 200){
+    Serial.println("Counter: " + String(count));
+  }
+  else{
+    Serial.println("Problem reading channel. HTTP error code " + String(statusCode)); 
+  }
+  
+  delay(15000); // No need to read the counter too often.
+  
 }
