@@ -27,6 +27,9 @@
 #include <WiFi.h>
 #include "secrets.h"
 #include "DHT.h"
+#define RED 14
+#define GRN 12
+#define BLU 13
 #define DHTTYPE DHT11   // DHT 11
 //#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
 //#define DHTTYPE DHT21   // DHT 21 (AM2301)
@@ -36,9 +39,13 @@ char pass[] = SECRET_PASS;   // your network password
 int keyIndex = 0;            // your network key Index number (needed only for WEP)
 int ventilo = 22;
 int buzz = 15;
+
 WiFiClient  client;
 DHT dht(DHTPIN, DHTTYPE);
 void setup() {
+  pinMode(RED, OUTPUT);
+  pinMode(GRN, OUTPUT);
+  pinMode(BLU, OUTPUT);
   Serial.begin(115200);  //Initialize serial
   Serial.println(F("DHTxx test!"));
   pinMode(ventilo, OUTPUT);
@@ -76,6 +83,11 @@ void loop() {
   // Check if any reads failed and exit early (to try again).
   if (isnan(h) || isnan(t) || isnan(f)) {
     Serial.println(F("erreur de donnée"));
+       digitalWrite(RED, HIGH);
+       digitalWrite(GRN, LOW);
+       digitalWrite(BLU, LOW);
+ 
+   delay(1000);
     return;
   }
   float hif = dht.computeHeatIndex(f, h);
@@ -86,9 +98,19 @@ void loop() {
   Serial.println(t);
   if(t<30){
     digitalWrite(ventilo, LOW);
+       digitalWrite(RED, LOW);
+       digitalWrite(GRN, HIGH);
+       digitalWrite(BLU, LOW);
+ 
+   delay(1000);
     }
     else{
       digitalWrite(ventilo, HIGH);
+       digitalWrite(RED, LOW);
+       digitalWrite(GRN, LOW);
+       digitalWrite(BLU, HIGH);
+ 
+   delay(1000);
       }
   }
 }
