@@ -24,8 +24,9 @@
   
   Copyright 2020, The MathWorks, Inc.
 */
+#include <Servo.h>
+#include <LiquidCrystal.h>
 #include <WiFi.h>
-//#include "Servo.h"
 #define servo 11
 #define photo 21  // composante photoresistor sur la pin A1
 #include "secrets.h"
