@@ -1,35 +1,15 @@
-/*
-  ReadField
-  
-  Description: Demonstates reading from a public channel which requires no API key and reading from a private channel which requires a read API key.
-               The value read from the public channel is the current outside temperature at MathWorks headquaters in Natick, MA.  The value from the
-               private channel is an example counter that increments every 10 seconds.
-  
-  Hardware: ESP32 based boards
-  
-  !!! IMPORTANT - Modify the secrets.h file for this project with your network connection and ThingSpeak channel details. !!!
-  
-  Note:
-  - Requires installation of EPS32 core. See https://github.com/espressif/arduino-esp32/blob/master/docs/arduino-ide/boards_manager.md for details. 
-  - Select the target hardware from the Tools->Board menu
-  - This example is written for a network using WPA encryption. For WEP or WPA, change the WiFi.begin() call accordingly.
-  
-  ThingSpeak ( https://www.thingspeak.com ) is an analytic IoT platform service that allows you to aggregate, visualize, and 
-  analyze live data streams in the cloud. Visit https://www.thingspeak.com to sign up for a free account and create a channel.  
-  
-  Documentation for the ThingSpeak Communication Library for Arduino is in the README.md folder where the library was installed.
-  See https://www.mathworks.com/help/thingspeak/index.html for the full ThingSpeak documentation.
-  
-  For licensing information, see the accompanying license file.
-  
-  Copyright 2020, The MathWorks, Inc.
-*/
-//#include <Servo.h>
+/*Groupe 4*/
+
+int digitalPin = 33; // pour le relais
+int analogPin = 32; // pour le capteur de l'humidité du sol
+int digitalVal; // digital readings
+int analogVal; //analog readings
+
 #include <ESP32Servo.h>
 #include <LiquidCrystal.h>
 #include <WiFi.h>
-#define servo 11
-#define photo 21  // composante photoresistor sur la pin A1
+#define servo 11     //le pin du servoMoteur
+#define photo 36  // composante photoresistor sur le pin 36
 #include "secrets.h"
 #include "DHT.h"
 #define RED 14
@@ -45,10 +25,15 @@ int keyIndex = 0;            // your network key Index number (needed only for W
 int ventilo = 22;
 int buzz = 15;
 unsigned int lumiere;
-Servo servoToit;
+Servo servoToit;     // on crée l'objet servoToit
 WiFiClient  client;
 DHT dht(DHTPIN, DHTTYPE);
 void setup() {
+
+  pinMode(digitalPin, OUTPUT); //pour initialiser le capteure de l'himudité
+  digitalWrite(digitalPin, LOW);
+  
+  servoToit.setPeriodHertz(50); // Fréquence PWM pour le SG90
   servoToit.attach(11); // attache le servo au pin spécifié
   pinMode(photo, INPUT);
   pinMode(RED, OUTPUT);  // qui permet de manipuler la led tricolore avec les différentes couleures 
@@ -58,6 +43,8 @@ void setup() {
   Serial.println(F("DHTxx test!"));
   pinMode(ventilo, OUTPUT);
   pinMode(buzz, OUTPUT);
+  int analogValue = analogRead(photo);
+  
   dht.begin();
   while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo native USB port only
@@ -112,8 +99,19 @@ void loop() {
   Serial.println(value);
 
    delay(5000);
+/*Cette partie consiste à faire l'arrosage automatique*/
+
+   analogVal = analogRead(analogPin);               //lire la valeur retournée par le capteur de l'humidité
+    if (analogVal<400){                              //si la capteur de l'humidité retourne une valeur<500
+    digitalWrite(digitalPin, HIGH);                    //La pompe à eau arrose la plante
+    } else {                            // sinon
+    digitalWrite(digitalPin, LOW); //La pompe à eau arrête l'arrosage
+    }
+    delay(100);
+
+  /*cette partie décrit le comportement du système en temps normal c'est à dire température inférieure à 30*/  
   if(t<30){
-    digitalWrite(ventilo, LOW);
+       digitalWrite(ventilo, LOW);
        digitalWrite(RED, LOW);
        digitalWrite(GRN, HIGH);
        digitalWrite(BLU, LOW);
@@ -128,6 +126,7 @@ void loop() {
  
    delay(1000);
       }
+      /*ici on dicte l'ouverture ou la fermeture du toit selon la luminosité mesurée*/
    if (value < 80) { servoToit.write(0); }
    if (value >= 80) { servoToit.write(180); }
 }
