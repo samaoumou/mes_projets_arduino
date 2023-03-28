@@ -24,7 +24,8 @@
   
   Copyright 2020, The MathWorks, Inc.
 */
-#include <Servo.h>
+//#include <Servo.h>
+#include <ESP32Servo.h>
 #include <LiquidCrystal.h>
 #include <WiFi.h>
 #define servo 11
@@ -44,16 +45,16 @@ int keyIndex = 0;            // your network key Index number (needed only for W
 int ventilo = 22;
 int buzz = 15;
 unsigned int lumiere;
-
+Servo servoToit;
 WiFiClient  client;
 DHT dht(DHTPIN, DHTTYPE);
 void setup() {
-  //issa.attach(5); // attache le servo au pin spécifié
+  servoToit.attach(11); // attache le servo au pin spécifié
   pinMode(photo, INPUT);
-  pinMode(RED, OUTPUT);
-  pinMode(GRN, OUTPUT);
+  pinMode(RED, OUTPUT);  // qui permet de manipuler la led tricolore avec les différentes couleures 
+  pinMode(GRN, OUTPUT); // et de les définir comme les sortie 
   pinMode(BLU, OUTPUT);
-  Serial.begin(115200);  //Initialize serial
+  Serial.begin(115200);  //Initialize serial 
   Serial.println(F("DHTxx test!"));
   pinMode(ventilo, OUTPUT);
   pinMode(buzz, OUTPUT);
@@ -77,7 +78,7 @@ void loop() {
       Serial.print(".");
       delay(5000);     
     } 
-    Serial.println("\nConnected");
+    Serial.println("\nConnected");  //la connexion de l'esp affichage message
     Serial.println (WiFi.localIP ());
       // Reading temperature or humidity takes about 250 milliseconds!
   // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
@@ -92,7 +93,7 @@ void loop() {
 
   // Check if any reads failed and exit early (to try again).
   if (isnan(h) || isnan(t) || isnan(f)) {
-    Serial.println(F("erreur de donnée"));
+    Serial.println(F("erreur de donnée")); // le message affiché quand il y a une errreure de branchement
        digitalWrite(RED, HIGH);
        digitalWrite(GRN, LOW);
        digitalWrite(BLU, LOW);
@@ -127,8 +128,8 @@ void loop() {
  
    delay(1000);
       }
-   /*if (value < 80) { issa.write(0); }
-   if (value >= 80) { issa.write(180); }*/
+   if (value < 80) { servoToit.write(0); }
+   if (value >= 80) { servoToit.write(180); }
 }
 
 
